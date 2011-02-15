@@ -20,7 +20,7 @@ DOMStorageAdaptor.prototype = {
 		var self = this;
 		this.storage = this.merge(window.localStorage, options.storage);
 		this.table = this.merge('field', options.table);
-		
+
 		if (!window.Storage) {
 			this.storage = (function () {
 				// window.top.name ensures top level, and supports around 2Mb
@@ -56,10 +56,15 @@ DOMStorageAdaptor.prototype = {
 		}
 	},
 
+    beginBatch: function(callback) {
+    },
+    endBatch: function(callback) {
+    },
+
     get:function(key, callback) {
         var obj = this.deserialize(this.storage.getItem(this.table + '::' + key))
           , cb = this.terseToVerboseCallback(callback);
-        
+
         if (obj) {
             obj.key = key;
             if (callback) cb(obj);

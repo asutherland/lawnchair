@@ -119,7 +119,7 @@ GearsSQLiteAdaptor.prototype = {
 		var insert = function(obj, callback) {
 			var id = (typeof obj.key == 'undefined') ? that.uuid() : obj.key;
 			delete(obj.key);
-	
+
 			var rs = that.db.execute(
 				"INSERT INTO " + that.table + " (id, value, timestamp) VALUES (?,?,?)",
 				[id, that.serialize(obj), that.now()]
@@ -129,7 +129,7 @@ GearsSQLiteAdaptor.prototype = {
 				that.terseToVerboseCallback(callback)(obj);
 			}
 		};
-	
+
 		var update = function(id, obj, callback) {
 			that.db.execute(
 				"UPDATE " + that.table + " SET value=?, timestamp=? WHERE id=?",
@@ -140,13 +140,13 @@ GearsSQLiteAdaptor.prototype = {
 				that.terseToVerboseCallback(callback)(obj);
 			}
 		};
-	
+
 		if (typeof obj.key == 'undefined') {
 			insert(obj, callback);
 		} else {
 			this.get(obj.key, function(r) {
 				var isUpdate = (r != null);
-	
+
 				if (isUpdate) {
 					var id = obj.key;
 					delete(obj.key);
@@ -156,11 +156,17 @@ GearsSQLiteAdaptor.prototype = {
 				}
 			});
 		}
-	
+
 	},
+        beginBatch: function(callback) {
+          this.db.execute("BEGIN");
+        },
+        endBatch: function(callback) {
+          this.db.execute("COMMIT");
+        },
 	get:function(key, callback) {
 		var rs = this.db.execute("SELECT * FROM " + this.table + " WHERE id = ?", [key]);
-	
+
 		if (rs.isValidRow()) {
 			// FIXME need to test null return / empty recordset
 			var o = this.deserialize(rs.field(1));
@@ -177,11 +183,11 @@ GearsSQLiteAdaptor.prototype = {
 		var rs	= this.db.execute("SELECT * FROM " + this.table);
 		var r		= [];
 		var o;
-	
+
 		// FIXME need to add 0 len support
 		//if (results.rows.length == 0 ) {
 		//	cb([]);
-	
+
 		while (rs.isValidRow()) {
 			o = this.deserialize(rs.field(1));
 			o.key = rs.field(0);
